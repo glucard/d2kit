@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 
 from d2aa.config import Calibration
-from d2aa.detect.pixel import PixelDetector, color_distance, patch_mean_rgb
+from d2aa.detect.pixel import PixelDetector, patch_mean_rgb
 
 
 class FakeCapturer:
@@ -41,11 +41,6 @@ def test_patch_mean_rgb_reads_rgb_from_bgr():
     frame = _solid_bgr(50, 80, (243, 145, 38))
     mean = patch_mean_rgb(frame, 0.5, 0.5, 5)
     assert list(np.round(mean)) == [243, 145, 38]
-
-
-def test_color_distance():
-    assert color_distance([0, 0, 0], [0, 0, 0]) == 0.0
-    assert color_distance([0, 0, 0], [3, 4, 0]) == 5.0
 
 
 def test_detects_matching_color():

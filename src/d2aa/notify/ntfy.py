@@ -19,7 +19,6 @@ class NtfyNotifier:
         if not topic:
             raise ValueError("ntfy topic is empty; run `d2aa --config` first")
         self._url = f"{server.rstrip('/')}/{topic}"
-        self._timeout = timeout
         # Reuse one connection so a found-match POST skips TCP/TLS setup latency.
         self._client = httpx.Client(timeout=timeout, http2=False)
 

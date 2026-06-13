@@ -78,7 +78,7 @@ def run() -> int:
     if not explicit and interactive:
         from .menu import run_menu
 
-        return run_menu(args.verbose)
+        return run_menu()
 
     # Explicit flags, or a non-interactive run (pipe / CI / autostart service).
     try:

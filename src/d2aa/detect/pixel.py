@@ -53,11 +53,6 @@ def match_fraction(frame: Frame, calib: Calibration, target: np.ndarray) -> floa
     return float((dist <= calib.tolerance).mean())
 
 
-def color_distance(a, b) -> float:
-    """Euclidean distance between two RGB triples."""
-    return float(np.linalg.norm(np.asarray(a, float) - np.asarray(b, float)))
-
-
 class PixelDetector(Detector):
     def __init__(self, capturer: ScreenCapturer, calib: Calibration) -> None:
         self._cap = capturer

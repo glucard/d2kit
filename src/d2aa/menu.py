@@ -97,7 +97,7 @@ def _dispatch(action: str) -> bool:
     return action != "quit"
 
 
-def run_menu(verbose: bool = False) -> int:
+def run_menu() -> int:
     while True:
         cfg = _load_cfg_safe()
         _header(cfg)
