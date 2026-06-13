@@ -36,8 +36,8 @@ def send_test(cfg: Config) -> None:
     """Send a test notification and report it. Shared by the flag and the menu."""
     ui.console.print("[muted]Sending a test notification…[/]")
     make_notifier(cfg.ntfy).send(
-        title="d2aa test ✅",
-        message="If you see this on your phone, notifications work!",
+        title="d2aa test",
+        message="✅ If you see this on your phone, notifications work!",
         priority=cfg.ntfy.priority,
         tags=cfg.ntfy.tags,
     )

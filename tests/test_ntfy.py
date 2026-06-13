@@ -38,6 +38,23 @@ def test_send_posts_expected_request(monkeypatch):
     assert captured["headers"]["Click"] == "https://example.com"
 
 
+def test_non_ascii_title_is_sanitized_not_crashing(monkeypatch):
+    captured = {}
+
+    def fake_post(self, url, *, content, headers):
+        captured["headers"] = headers
+        return httpx.Response(200, request=httpx.Request("POST", url))
+
+    monkeypatch.setattr(httpx.Client, "post", fake_post)
+
+    # An emoji in the title must not raise (HTTP headers are ASCII-only).
+    NtfyNotifier("https://ntfy.sh", "t").send(title="d2aa test ✅", message="hi ✅")
+
+    title = captured["headers"]["Title"]
+    title.encode("ascii")  # would raise if any non-ASCII slipped through
+    assert "✅" not in title
+
+
 def test_send_swallows_http_errors(monkeypatch):
     def boom(*a, **k):
         raise httpx.ConnectError("down")
