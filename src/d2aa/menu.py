@@ -8,8 +8,6 @@ the rest of the app. No detection/notify/config logic lives here.
 
 from __future__ import annotations
 
-import sys
-
 import questionary
 from questionary import Choice, Style
 
@@ -50,8 +48,7 @@ def _ready_reason(cfg: Config | None) -> str | None:
     if cfg is None:
         return _GATED
     if cfg.detector.backend.lower() == "console":
-        ok = sys.platform == "linux" and resolve_console_log(cfg.detector.console_log_path)
-        return None if ok else _GATED
+        return None if resolve_console_log(cfg.detector.console_log_path) else _GATED
     return None if cfg.calibration.calibrated else _GATED
 
 
@@ -72,7 +69,7 @@ def _choose_method() -> None:
         "Detection method",
         choices=[
             Choice("Screen (pixel) — works on Windows + Linux", value="pixel"),
-            Choice("Console log (Game Coordinator) — Linux only", value="console"),
+            Choice("Console log (Game Coordinator) — needs -condebug", value="console"),
         ],
         default="console" if current == "console" else "pixel",
         style=MENU_STYLE,

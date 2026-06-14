@@ -78,17 +78,19 @@ def test_custom_triggers(tmp_path):
     assert det.poll() is not None
 
 
-def test_preflight_missing_file(tmp_path, monkeypatch):
-    monkeypatch.setattr("sys.platform", "linux")
+def test_preflight_missing_file(tmp_path):
     det = ConsoleLogDetector(log_path=str(tmp_path / "nope.log"))
     msg = det.preflight()
     assert msg and "condebug" in msg
 
 
-def test_preflight_windows(monkeypatch):
+def test_preflight_ok_on_any_platform(tmp_path, monkeypatch):
+    # Console detection works on Windows too (console.log is real-time there).
     monkeypatch.setattr("sys.platform", "win32")
-    msg = ConsoleLogDetector().preflight()
-    assert msg and "Linux" in msg
+    p = tmp_path / "console.log"
+    p.write_text("")
+    det = ConsoleLogDetector(log_path=str(p))
+    assert det.preflight() is None
 
 
 def test_resolve_explicit_path(tmp_path):
@@ -108,10 +110,7 @@ def test_resolve_via_libraryfolders_second_drive(tmp_path, monkeypatch):
     dota_dir.mkdir(parents=True)
     (dota_dir / "console.log").write_text("")
     (root / "steamapps" / "libraryfolders.vdf").write_text(
-        '"libraryfolders"\n{\n'
-        f'  "0" {{ "path" "{root}" }}\n'
-        f'  "1" {{ "path" "{lib2}" }}\n'
-        "}\n",
+        f'"libraryfolders"\n{{\n  "0" {{ "path" "{root}" }}\n  "1" {{ "path" "{lib2}" }}\n}}\n',
         encoding="utf-8",
     )
     monkeypatch.setattr("d2aa.detect.console._STEAM_ROOTS", [str(root)])

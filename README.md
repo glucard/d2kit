@@ -113,7 +113,7 @@ normally never edit this by hand — the wizard writes it for you.
 
 ```toml
 [detector]
-backend = "pixel"          # "pixel" (screen) or "console" (Game Coordinator log, Linux)
+backend = "pixel"          # "pixel" (screen) or "console" (Game Coordinator log)
 
 [detector.console]
 log_path = "auto"          # "auto" finds Dota's console.log, or an explicit path
@@ -145,23 +145,24 @@ Detection is **pluggable** — everything sits behind a `Detector` interface
 
 - **`pixel`** — watches a calibrated screen region. Works on Windows + Linux; needs
   Dota visible.
-- **`console`** (Linux only) — reads Dota's **Game Coordinator log** (`console.log`,
+- **`console`** (Linux + Windows) — reads Dota's **Game Coordinator log** (`console.log`,
   written by the launch options `-condebug -conclearlog`) and fires the instant the
   ready-check appears. Resolution-independent, no calibration, works even when Dota is
-  minimized. Linux-only because `console.log` is buffered-until-exit on Windows.
+  minimized. The more reliable backend; recommended where available.
 
 Screen capture (pixel backend) is likewise abstracted: **mss** on Windows/X11, the
 **PipeWire ScreenCast portal** on Wayland (where mss returns black for fullscreen games).
 
-### Console detection setup (Linux)
+### Console detection setup (Linux + Windows)
 
 1. Steam → Dota 2 → Properties → **Launch Options** → add `-condebug -conclearlog`, then
    restart Dota. (`-conclearlog` also keeps the log small — it's wiped each launch.)
 2. In the d2aa menu: **Detection method → Console log**. It auto-finds `console.log`
    across all your Steam libraries (it reads `libraryfolders.vdf`, so Dota on a second
-   drive / custom library is handled — native, Flatpak, and Snap Steam too). No
-   calibration needed. If your setup is unusual, set an explicit path in the config:
-   `[detector.console] log_path = "/full/path/to/console.log"`.
+   drive / custom library is handled — Linux native/Flatpak/Snap and the default Windows
+   `C:\Program Files (x86)\Steam` install). No calibration needed. If your setup is
+   unusual, set an explicit path in the config:
+   `[detector.console] log_path = "…/console.log"`.
 3. Test penalty-free: create a **custom arcade lobby** (it uses the same ready-up
    messages as matchmaking) and run **Tune detection** to watch it fire.
 

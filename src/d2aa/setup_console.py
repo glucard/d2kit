@@ -1,9 +1,9 @@
-"""Terminal setup for the console (Game Coordinator log) detector — Linux only.
+"""Terminal setup for the console (Game Coordinator log) detector.
 
 Parallel to the pixel calibration wizard, but there's nothing to calibrate: we
 just confirm Dota's console.log is reachable (it needs the launch options
 ``-condebug -conclearlog``), select the console backend, and make sure a phone
-topic exists. No tkinter, no screen capture.
+topic exists. Works on Linux and Windows. No tkinter, no screen capture.
 """
 
 from __future__ import annotations
@@ -28,17 +28,11 @@ def _carry_config() -> Config:
 
 
 def run() -> int:
-    if sys.platform != "linux":
-        ui.error(
-            "Console detection is Linux-only. On Windows use [accent]Set up detection[/] (screen)."
-        )
-        return 1
-
     ui.panel(
         "Reads Dota's [topic]Game Coordinator[/] log to catch the ready-check the\n"
         "instant it appears — no screen capture, no calibration, works even when\n"
-        "Dota is minimized.",
-        title="d2aa · console setup (Linux)",
+        "Dota is minimized. (Linux & Windows.)",
+        title="d2aa · console setup",
         style="accent",
     )
 

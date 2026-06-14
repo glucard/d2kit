@@ -1,10 +1,10 @@
-"""Console-log detector (Linux): tail Dota's console.log for the ready-up message.
+"""Console-log detector: tail Dota's console.log for the ready-up message.
 
-With launch options ``-condebug -conclearlog``, Dota writes ``console.log`` and —
-on Linux — updates it in real time. When a match is found, the Game Coordinator
-logs ``k_EMsgGCReadyUpStatus`` repeatedly during the ready-check; the first such
-line lands the instant the Accept popup appears (verified ~11s before the user
-accepts, and independent of whether they accept at all).
+With launch options ``-condebug -conclearlog``, Dota writes ``console.log`` and
+updates it in real time (verified on both Linux and Windows). When a match is
+found, the Game Coordinator logs ``k_EMsgGCReadyUpStatus`` repeatedly during the
+ready-check; the first such line lands the instant the Accept popup appears
+(verified ~11s before the user accepts, and independent of whether they accept).
 
 We tail the file and fire on each new trigger line; the watch loop's cooldown
 collapses the repeated status lines of one ready-check into a single
@@ -12,16 +12,12 @@ notification (just like the pixel backend), while still firing for later
 ready-checks in the same session. No thread is needed — each ``poll()`` reads
 only the bytes appended since the last call. Truncation (``-conclearlog`` wiping
 the log on relaunch) and rotation are handled by re-reading from the new start.
-
-This backend is Linux-only: on Windows ``console.log`` is buffered until the
-client exits, so there's nothing to tail in real time.
 """
 
 from __future__ import annotations
 
 import os
 import re
-import sys
 from pathlib import Path
 
 from .base import Detector, MatchEvent
@@ -29,12 +25,17 @@ from .base import Detector, MatchEvent
 DEFAULT_TRIGGERS = ["k_EMsgGCReadyUpStatus"]
 
 # Steam install roots where libraryfolders.vdf and the default library live.
+# Non-existent ones are skipped, so listing every platform's defaults is safe.
 _STEAM_ROOTS = [
+    # Linux
     "~/.local/share/Steam",
     "~/.steam/steam",
     "~/.steam/root",
     "~/.var/app/com.valvesoftware.Steam/.local/share/Steam",  # Flatpak
     "~/snap/steam/common/.local/share/Steam",  # Snap
+    # Windows (other drives are discovered via libraryfolders.vdf)
+    "C:/Program Files (x86)/Steam",
+    "C:/Program Files/Steam",
 ]
 # Dota's console.log relative to a Steam library root.
 _DOTA_SUBPATH = "steamapps/common/dota 2 beta/game/dota/console.log"
@@ -72,7 +73,8 @@ def _library_paths() -> list[Path]:
             except OSError:
                 continue
             for match in _LIBRARY_PATH_RE.findall(text):
-                _add(Path(match))
+                # Windows VDF escapes backslashes ("D:\\Games"); un-escape them.
+                _add(Path(match.replace("\\\\", "\\")))
     return libs
 
 
@@ -106,11 +108,6 @@ class ConsoleLogDetector(Detector):
     # -- readiness ---------------------------------------------------------
 
     def preflight(self) -> str | None:
-        if sys.platform != "linux":
-            return (
-                "Console detection only works on Linux (Dota's console.log isn't "
-                "real-time on Windows). Use the screen detector there."
-            )
         path = resolve_console_log(self._configured)
         if path is None:
             paths = candidate_paths()

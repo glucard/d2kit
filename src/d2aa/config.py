@@ -24,7 +24,7 @@ class ConfigError(Exception):
 
 @dataclass
 class DetectorConfig:
-    backend: str = "pixel"  # "pixel" (screen) | "console" (Game Coordinator log, Linux)
+    backend: str = "pixel"  # "pixel" (screen) | "console" (Game Coordinator log)
     # Console-backend settings (ignored by the pixel backend).
     console_log_path: str = "auto"  # "auto" finds Dota's console.log, or an explicit path
     console_triggers: list[str] = field(default_factory=lambda: ["k_EMsgGCReadyUpStatus"])
